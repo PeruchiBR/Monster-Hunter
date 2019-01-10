@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Monster Slayer</title>
+	<script src="https://npmcdn.com/vue/dist/vue.js"></script>
+	<link rel="stylesheet" href="css/foundation.min.css">
+	<link rel="stylesheet" href="css/app.css">
+</head>
+
+<body>
+	<div id="app">
+		<section class="row">
+			<div class="small-6 columns">
+				<h1 class="text-center">YOU</h1>
+				<div class="healthbar">
+					<div class="healthbar text-center"
+							 style="background-color: green; margin: 0; color: white;" 
+							 :style="{width: playerBar + '%'}">
+						{{playerBar}}
+					</div>
+				</div>
+			</div>
+			<div class="small-6 columns">
+				<h1 class="text-center">MONSTER</h1>
+				<div class="healthbar">
+					<div class="healthbar text-center" 
+							 style="background-color: green; margin: 0; color: white;" 
+							 :style="{width: monsterBar + '%'}">
+						{{monsterBar}}
+					</div>
+				</div>
+			</div>
+		</section>
+		<section class="row controls" v-if="!newGame">
+			<div class="small-12 columns">
+				<button id="start-game" @click="startGame">START NEW GAME</button>
+			</div>
+		</section>
+		<section class="row controls" v-if="newGame">
+			<div class="small-12 columns">
+				<button id="attack" @click="attack">ATTACK</button>
+				<button id="special-attack" @click="specialAttack">SPECIAL ATTACK</button>
+				<button id="heal" @click="heal">HEAL</button>
+				<button id="give-up" @click="giveUp">GIVE UP</button>
+			</div>
+		</section>
+		<section v-if="attackLog.length > 0"class="row log">
+			<div class="small-12 columns">
+				<ul>
+					<li v-for="attacks in attackLog"
+					:class="{'player-turn': attacks.isPlayer, 'monster-turn': !attacks.isPlayer}">
+						{{attacks.text}}
+					</li>
+				</ul>
+			</div>
+		</section>
+	</div>
+
+	<script>
+	new Vue({
+			el: '#app',
+			data: {
+				newGame: false,
+				randomValue: 0,
+				attackLog: [],
+				monsterBar: 100,
+				playerBar: 100,
+			},
+
+			methods: {
+				attack: function(){
+					
+					if(this.monsterBar > 0){
+				this.randomValue = Math.floor(Math.random() * 10);
+				this.monsterBar -= this.randomValue;
+				this.attackLog.unshift({
+					isPlayer: true,
+					text: 'Player hits Monster for ' + this.randomValue});
+				}else {
+					alert('The Monster is dead!');
+					this.newGame = false;
+				}
+
+					if (this.playerBar > 0) {
+				this.randomValue = Math.floor(Math.random() * 10);
+				this.playerBar -= this.randomValue;
+					this.attackLog.unshift({
+							isPlayer: false,
+							text: 'Monster hits Player for ' + this.randomValue
+						});
+				
+					}else {
+						alert('You are dead!');
+						this.newGame = false;
+					}
+					console.log(this.attackLog)
+				},
+
+				specialAttack: function(){
+					if (this.monsterBar > 0) {
+					this.randomValue = Math.floor((Math.random() * 10)+10);
+					this.monsterBar -= this.randomValue;				
+					this.attackLog.unshift({
+							isPlayer: true,
+							text: 'Player hits Monster hard for ' + this.randomValue
+						});
+					} else {
+						alert('The Monster is dead!');
+						this.newGame = false;
+						startGame();
+					}
+
+					if (this.playerBar > 0) {
+					this.randomValue = Math.floor(Math.random() * 10);
+					this.playerBar -= this.randomValue;
+					this.attackLog.unshift({
+							isPlayer: false,
+							text: 'Monster hits Player for ' + this.randomValue
+						});
+						} else {
+						alert('You are dead!');
+						this.newGame = false;
+						startGame();
+					}
+				},
+
+				heal: function(){	
+
+					if (this.playerBar > 0) {
+						this.randomValue = Math.floor(Math.random() * 10);
+						this.playerBar -= this.randomValue;
+						this.attackLog.unshift({
+							isPlayer: false,
+							text: 'Monster hits Player for ' + this.randomValue
+						});
+					} else {
+						alert('You are dead!');
+						this.newGame = false;
+						startGame();
+					}
+
+						if (this.playerBar > 0 && this.monsterBar > 0) {
+							if (this.playerBar <= 90) {
+								this.playerBar += 10;
+								this.attackLog.unshift({
+									isPlayer: true,
+									text: 'Player heals for ' + 10 + ' HP'
+							});
+						} else {
+							this.playerBar = 100;
+							this.attackLog.unshift({
+								isPlayer: true,
+								text: 'Player HP is full'
+							});
+						}
+					} else {
+						alert('You can\'t heal!');
+					}
+				},
+
+				giveUp: function(){
+					this.newGame = false;
+				},
+
+				startGame: function() {
+					this.newGame = true;
+					this.playerBar = 100;
+					this.monsterBar = 100;
+					this.attackLog = [];
+				}
+
+			},
+		})
+
+	</script>
+
+</body>
+
+</html>
